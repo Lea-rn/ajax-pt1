@@ -27,3 +27,9 @@ img {
 .card-description{
     margin-left: 20px;
 }
+
+.neighbor{
+    height: 410px;
+    margin-top: 80px;
+    margin-left: 100px;
+}
