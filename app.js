@@ -26,6 +26,11 @@
 // })
 
 const cardContainer = document.querySelector(".card-container");
+const button = document.querySelector(".btn")
+const message = document.querySelector(".err")
+ 
+
+
 
 ////// asynchrone ::: 
 
@@ -77,31 +82,36 @@ const RenderCountry = function  (data , className =""){
 cardContainer.insertAdjacentHTML("afterbegin",html)
 }
 
-const getCountryAndNeighbor = function(country){
-const request = new XMLHttpRequest ()
-request.open("GET",`https://restcountries.com/v2/name/${country}`)
-request.send();
-request.addEventListener("load",function(){
-  const [data] = JSON.parse(this.responseText)
-    console.log(data)
- RenderCountry(data)
 
- const neighbor = data.borders?.[0] 
- console.log(neighbor)
- if (!neighbor) return ; 
- const request2 = new XMLHttpRequest() 
- request2.open("GET" ,`https://restcountries.com/v2/alpha/${neighbor}`)
- request2.send()
- request2.addEventListener("load",function(){
-   const data2 = JSON.parse(this.responseText)
-   console.log("data2 :" , data2) ; 
-   RenderCountry(data2 , "neighbor")
- })
-})
+const renderError = function(msg){
+  message.insertAdjacentText("afterbegin",msg)
 }
+////// without promise :: 
+// const getCountryAndNeighbor = function(country){
+// const request = new XMLHttpRequest ()
+// request.open("GET",`https://restcountries.com/v2/name/${country}`)
+// request.send();
+// request.addEventListener("load",function(){
+//   const [data] = JSON.parse(this.responseText)
+//     console.log(data)
+//  RenderCountry(data)
+
+//  const neighbor = data.borders?.[0] 
+//  console.log(neighbor)
+//  if (!neighbor) return ; 
+//  const request2 = new XMLHttpRequest() 
+//  request2.open("GET" ,`https://restcountries.com/v2/alpha/${neighbor}`)
+//  request2.send()
+//  request2.addEventListener("load",function(){
+//    const data2 = JSON.parse(this.responseText)
+//    console.log("data2 :" , data2) ; 
+//    RenderCountry(data2 , "neighbor")
+//  })
+// })
+// }
 
 
-getCountryAndNeighbor("tunisia")
+// getCountryAndNeighbor("france")
 
 
 ///// callback hill :::  
@@ -118,3 +128,43 @@ getCountryAndNeighbor("tunisia")
 //    console.log("hello")
 //   },12000)
 // },4000)
+
+
+
+////// promise :::: 
+
+const getCountryAndNEighbor = function (country){
+ fetch(`https://restcountries.com/v2/name/${country}`).then((res)=>{
+ const data = res.json()
+ return data
+}).then((res)=>{
+  const [fisrtCountry] = res
+    console.log(fisrtCountry) ; 
+    RenderCountry(fisrtCountry) ; 
+    return fisrtCountry ; 
+}).then((res)=>{
+  // const neighbor = res.borders?.[res.borders.length-1] ; //// return last element in the array ... 
+  const neighbor = res.borders?.[0]
+  console.log(neighbor)
+  if (!neighbor) return ; 
+  return neighbor ;  ///// code (tun , aut .... )
+}).then((res)=>{
+  return fetch(`https://restcountries.com/v2/alpha/${res}`)
+}).then((res)=>{
+  const data2 = res.json()
+     console.log(data2) ; 
+     return data2
+}).then((res)=>{
+  console.log(res)
+  RenderCountry(res,"neighbor")
+}).catch((err)=>{
+  console.log(`${err}`) ; 
+  renderError(err)
+})
+
+}
+
+button.addEventListener("click",function(){
+  getCountryAndNEighbor("Bahamas")
+})
+
